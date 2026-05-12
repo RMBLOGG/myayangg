@@ -196,16 +196,24 @@ let animId = null;
 let isFirstLoad = true;
 const ASSEMBLE_FRAMES = 110;
 
+// Heart parametric formula
+// x range: -16 to 16, y range: -17 to 13 (NOT symmetric!)
+// Visual center offset: (yMax+yMin)/2 = (-17+13)/2 = -2 units
 function hx(t) { return 16 * Math.pow(Math.sin(t), 3); }
 function hy(t) { return -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)); }
+
+// Heart bounding box in formula units:
+// x: -16 to 16  → width = 32
+// y: -17 to 13  → height = 30, visual center at y = -2 units
+const HEART_Y_OFFSET = -2; // shift canvas center to match heart visual center
 
 function getSize() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const isLandscapeMobile = vw > vh && vh < 500;
-  const reserved = isLandscapeMobile ? 140 : (vw < 768 ? 190 : 250);
+  const reserved = isLandscapeMobile ? 140 : (vw < 768 ? 180 : 240);
   const fromHeight = vh - reserved;
-  const fromWidth = vw < 768 ? vw - 32 : Math.min(vw * 0.52, 500);
+  const fromWidth = vw < 768 ? vw - 40 : Math.min(vw * 0.52, 500);
   return Math.max(180, Math.floor(Math.min(fromHeight, fromWidth)));
 }
 
@@ -219,7 +227,6 @@ function buildParticles(skipAnimation) {
     const by = CY + hy(t) * SCALE * r + (Math.random()-.5)*2.2;
     particles.push({
       bx, by,
-      // on resize: start from target so no re-assembly garis
       x: skipAnimation ? bx : CX + (Math.random()-.5) * W * 1.4,
       y: skipAnimation ? by : H + Math.random() * H,
       size: Math.random() * 2.4 + 0.5,
@@ -239,13 +246,15 @@ function init(skipAnimation) {
   frame = skipAnimation ? ASSEMBLE_FRAMES + 50 : 0;
 
   SIZE = getSize();
+  // Canvas aspect ratio matches heart bounding box: 32 wide x 30 tall
   canvas.width  = SIZE;
-  canvas.height = Math.floor(SIZE * 0.88);
+  canvas.height = Math.floor(SIZE * (30/32));
   W = canvas.width;
   H = canvas.height;
   CX = W / 2;
-  CY = H / 2 + H * 0.04;
-  SCALE = W / 58;
+  // Shift CY up by HEART_Y_OFFSET to visually center the heart
+  SCALE = W / 32;
+  CY = H / 2 - HEART_Y_OFFSET * SCALE;
 
   buildParticles(skipAnimation);
   loop();
@@ -285,7 +294,8 @@ function loop() {
   }
 
   if (frame > ASSEMBLE_FRAMES) {
-    const glow = ctx.createRadialGradient(CX, CY-4, 0, CX, CY-4, W * 0.38);
+    const glowR = SCALE * 17;
+    const glow = ctx.createRadialGradient(CX, CY, 0, CX, CY, glowR);
     glow.addColorStop(0, 'rgba(0,140,255,0.07)');
     glow.addColorStop(1, 'transparent');
     ctx.fillStyle = glow;
