@@ -172,7 +172,7 @@
   <div class="glow-ground"></div>
 </div>
 
-<div class="hint">Buat ayangg guehh my <span>AENI SAYANGGGG</span></div>
+<div class="hint">Kirim ke seseorang: <span>/to/NamaDia</span></div>
 
 <script>
 // Stars
@@ -193,6 +193,7 @@ let W, H, CX, CY, SCALE, SIZE;
 let particles = [];
 let frame = 0;
 let animId = null;
+let isFirstLoad = true;
 const ASSEMBLE_FRAMES = 110;
 
 function hx(t) { return 16 * Math.pow(Math.sin(t), 3); }
@@ -208,17 +209,19 @@ function getSize() {
   return Math.max(180, Math.floor(Math.min(fromHeight, fromWidth)));
 }
 
-function buildParticles() {
+function buildParticles(skipAnimation) {
   particles = [];
   const TOTAL = SIZE > 380 ? 1100 : SIZE > 260 ? 800 : 500;
   for (let i = 0; i < TOTAL; i++) {
     const t = Math.random() * Math.PI * 2;
     const r = Math.random() < 0.35 ? 1 : Math.random() * 0.92;
+    const bx = CX + hx(t) * SCALE * r + (Math.random()-.5)*2.2;
+    const by = CY + hy(t) * SCALE * r + (Math.random()-.5)*2.2;
     particles.push({
-      bx: CX + hx(t) * SCALE * r + (Math.random()-.5)*2.2,
-      by: CY + hy(t) * SCALE * r + (Math.random()-.5)*2.2,
-      x: CX + (Math.random()-.5) * W * 1.4,
-      y: H + Math.random() * H,
+      bx, by,
+      // on resize: start from target so no re-assembly garis
+      x: skipAnimation ? bx : CX + (Math.random()-.5) * W * 1.4,
+      y: skipAnimation ? by : H + Math.random() * H,
       size: Math.random() * 2.4 + 0.5,
       twinkle: Math.random() * Math.PI * 2,
       ts: 0.025 + Math.random() * 0.04,
@@ -226,14 +229,14 @@ function buildParticles() {
       sat: 80 + Math.random() * 20,
       lum: 55 + Math.random() * 40,
       alpha: 0.5 + Math.random() * 0.5,
-      delay: Math.floor(Math.random() * 60),
+      delay: skipAnimation ? 0 : Math.floor(Math.random() * 60),
     });
   }
 }
 
-function init() {
+function init(skipAnimation) {
   if (animId) cancelAnimationFrame(animId);
-  frame = 0;
+  frame = skipAnimation ? ASSEMBLE_FRAMES + 50 : 0;
 
   SIZE = getSize();
   canvas.width  = SIZE;
@@ -244,7 +247,7 @@ function init() {
   CY = H / 2 + H * 0.04;
   SCALE = W / 58;
 
-  buildParticles();
+  buildParticles(skipAnimation);
   loop();
 }
 
@@ -303,14 +306,15 @@ setInterval(() => {
   }
 }, 50);
 
-// Debounced resize
+// Debounced resize — skip assembly animation saat rotate/resize
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(init, 250);
+  resizeTimer = setTimeout(() => init(true), 300);
 });
 
-init();
+// First load: animasi assembly penuh
+init(false);
 </script>
 </body>
 </html>
