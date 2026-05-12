@@ -305,16 +305,8 @@ function loop() {
   animId = requestAnimationFrame(loop);
 }
 
-// Gentle float after assembled
-setInterval(() => {
-  if (frame < ASSEMBLE_FRAMES + 30) return;
-  for (const p of particles) {
-    p.bx += (Math.random() - 0.5) * 0.35;
-    p.by += (Math.random() - 0.5) * 0.35;
-    const dx = p.bx - (CX + hx(Math.atan2(p.by - CY, p.bx - CX)) * SCALE);
-    if (Math.abs(dx) > 6) p.bx -= dx * 0.15;
-  }
-}, 50);
+// Individual particle twinkle handles all animation after assembly
+// No drift/float — heart shape stays intact
 
 // Debounced resize — skip assembly animation saat rotate/resize
 let resizeTimer;
