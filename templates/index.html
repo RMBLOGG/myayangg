@@ -1,1 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>I Love You{% if name %} - {{ name }}{% endif %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root {
+      --blue: #00bfff;
+      --blue2: #007fff;
+      --glow: #00dfff;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      background: #000;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: 'Quicksand', sans-serif;
+      cursor: default;
+    }
+
+    .bg-rays {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 15% 90%, rgba(0,80,200,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 10%, rgba(0,60,180,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 110%, rgba(0,100,255,0.20) 0%, transparent 45%);
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      animation: twinkle var(--dur) ease-in-out infinite var(--delay);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.1; transform: scale(1); }
+      50%       { opacity: 0.7; transform: scale(1.4); }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(2rem, 8vw, 5rem);
+      color: var(--blue);
+      text-shadow:
+        0 0 8px var(--blue),
+        0 0 25px var(--blue),
+        0 0 55px var(--blue2),
+        0 0 90px var(--blue2);
+      letter-spacing: 0.04em;
+      animation: pulse-title 2.5s ease-in-out infinite;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    @keyframes pulse-title {
+      0%,100% { text-shadow: 0 0 8px var(--blue), 0 0 25px var(--blue), 0 0 55px var(--blue2), 0 0 90px var(--blue2); }
+      50%      { text-shadow: 0 0 14px var(--glow), 0 0 40px var(--glow), 0 0 75px var(--blue), 0 0 120px var(--blue); }
+    }
+
+    .to-name {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1rem, 3.5vw, 1.8rem);
+      color: rgba(180, 230, 255, 0.85);
+      text-shadow: 0 0 12px var(--blue2);
+      margin-bottom: 8px;
+      min-height: 1.6em;
+      animation: fade-in 1.5s ease forwards;
+      opacity: 0;
+      text-align: center;
+    }
+    @keyframes fade-in { to { opacity: 1; } }
+
+    .canvas-wrap {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+    }
+
+    .glow-ground {
+      width: min(260px, 65vw);
+      height: 32px;
+      background: radial-gradient(ellipse at center, rgba(0,150,255,0.55) 0%, transparent 72%);
+      border-radius: 50%;
+      animation: ground-pulse 2.2s ease-in-out infinite;
+      margin-top: -10px;
+    }
+    @keyframes ground-pulse {
+      0%,100% { opacity: 0.65; transform: scaleX(1); }
+      50%      { opacity: 1; transform: scaleX(1.08); }
+    }
+
+    .hint {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(0.58rem, 2vw, 0.72rem);
+      color: rgba(0,170,255,0.4);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      z-index: 20;
+      white-space: nowrap;
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+    .hint span { color: rgba(0,200,255,0.65); }
+
+    /* Landscape mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      h1 { font-size: clamp(1.4rem, 5vw, 2.5rem); margin-bottom: 2px; }
+      .to-name { font-size: clamp(0.8rem, 3vw, 1.2rem); margin-bottom: 2px; }
+      .glow-ground { height: 18px; margin-top: -4px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-rays"></div>
+<div class="stars" id="stars"></div>
+
+<div class="wrap">
+  <h1>I Love You</h1>
+  {% if name %}
+  <div class="to-name">— untuk {{ name }} —</div>
+  {% else %}
+  <div class="to-name">&nbsp;</div>
+  {% endif %}
+  <div class="canvas-wrap">
+    <canvas id="heart"></canvas>
+  </div>
+  <div class="glow-ground"></div>
+</div>
+
+<div class="hint">Buat ayangg guehh my <span>AENI SAYANGGGG</span></div>
+
+<script>
+// Stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--delay:${-Math.random()*5}s;`;
+  starsEl.appendChild(s);
+}
+
+// Canvas
+const canvas = document.getElementById('heart');
+const ctx = canvas.getContext('2d');
+
+let W, H, CX, CY, SCALE, SIZE;
+let particles = [];
+let frame = 0;
+let animId = null;
+const ASSEMBLE_FRAMES = 110;
+
+function hx(t) { return 16 * Math.pow(Math.sin(t), 3); }
+function hy(t) { return -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)); }
+
+function getSize() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const isLandscapeMobile = vw > vh && vh < 500;
+  const reserved = isLandscapeMobile ? 140 : (vw < 768 ? 190 : 250);
+  const fromHeight = vh - reserved;
+  const fromWidth = vw < 768 ? vw - 32 : Math.min(vw * 0.52, 500);
+  return Math.max(180, Math.floor(Math.min(fromHeight, fromWidth)));
+}
+
+function buildParticles() {
+  particles = [];
+  const TOTAL = SIZE > 380 ? 1100 : SIZE > 260 ? 800 : 500;
+  for (let i = 0; i < TOTAL; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const r = Math.random() < 0.35 ? 1 : Math.random() * 0.92;
+    particles.push({
+      bx: CX + hx(t) * SCALE * r + (Math.random()-.5)*2.2,
+      by: CY + hy(t) * SCALE * r + (Math.random()-.5)*2.2,
+      x: CX + (Math.random()-.5) * W * 1.4,
+      y: H + Math.random() * H,
+      size: Math.random() * 2.4 + 0.5,
+      twinkle: Math.random() * Math.PI * 2,
+      ts: 0.025 + Math.random() * 0.04,
+      hue: 195 + Math.random() * 45,
+      sat: 80 + Math.random() * 20,
+      lum: 55 + Math.random() * 40,
+      alpha: 0.5 + Math.random() * 0.5,
+      delay: Math.floor(Math.random() * 60),
+    });
+  }
+}
+
+function init() {
+  if (animId) cancelAnimationFrame(animId);
+  frame = 0;
+
+  SIZE = getSize();
+  canvas.width  = SIZE;
+  canvas.height = Math.floor(SIZE * 0.88);
+  W = canvas.width;
+  H = canvas.height;
+  CX = W / 2;
+  CY = H / 2 + H * 0.04;
+  SCALE = W / 58;
+
+  buildParticles();
+  loop();
+}
+
+function loop() {
+  ctx.clearRect(0, 0, W, H);
+  frame++;
+
+  for (const p of particles) {
+    if (frame < p.delay) continue;
+    const progress = Math.min(1, (frame - p.delay) / ASSEMBLE_FRAMES);
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    p.x += (p.bx - p.x) * (0.04 + eased * 0.03);
+    p.y += (p.by - p.y) * (0.04 + eased * 0.03);
+
+    p.twinkle += p.ts;
+    const tw = Math.sin(p.twinkle) * 0.5 + 0.5;
+    const alpha = (0.45 + tw * 0.55) * Math.min(1, progress * 3) * p.alpha;
+    const sz = p.size * (0.8 + tw * 0.5);
+
+    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, sz * 3.5);
+    g.addColorStop(0,   `hsla(${p.hue},${p.sat}%,${p.lum}%,${alpha})`);
+    g.addColorStop(0.4, `hsla(${p.hue},${p.sat}%,${p.lum}%,${alpha * 0.4})`);
+    g.addColorStop(1,   `hsla(${p.hue},${p.sat}%,${p.lum}%,0)`);
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, sz * 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, sz * 0.55, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue+20},100%,92%,${alpha})`;
+    ctx.fill();
+  }
+
+  if (frame > ASSEMBLE_FRAMES) {
+    const glow = ctx.createRadialGradient(CX, CY-4, 0, CX, CY-4, W * 0.38);
+    glow.addColorStop(0, 'rgba(0,140,255,0.07)');
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  animId = requestAnimationFrame(loop);
+}
+
+// Gentle float after assembled
+setInterval(() => {
+  if (frame < ASSEMBLE_FRAMES + 30) return;
+  for (const p of particles) {
+    p.bx += (Math.random() - 0.5) * 0.35;
+    p.by += (Math.random() - 0.5) * 0.35;
+    const dx = p.bx - (CX + hx(Math.atan2(p.by - CY, p.bx - CX)) * SCALE);
+    if (Math.abs(dx) > 6) p.bx -= dx * 0.15;
+  }
+}, 50);
+
+// Debounced resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(init, 250);
+});
+
+init();
+</script>
+</body>
+</html>
